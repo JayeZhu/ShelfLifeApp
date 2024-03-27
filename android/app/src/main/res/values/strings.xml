@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ShelfLiftApp</string>
+    <string name="app_name">ShelfLifeApp</string>
+    <string name="app_name_lower">yourappname</string>
 </resources>
