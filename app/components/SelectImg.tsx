@@ -20,15 +20,18 @@ interface IProps {
 const SelectImg = (props: IProps) => {
   const { onChange, options } = props;
   const [visible, setVisible] = useState(false);
-  const realOptions = {...defaultPickerOptions, ...options};
+  const realOptions = { ...defaultPickerOptions, ...options };
   const closeModal = () => {
-
+    setVisible(false);
   }
 
   const chooseImage = async () => {
+    console.log('choose')
     try {
       const image = await openPicker(realOptions);
+      console.log('image', image);
       onChange(image);
+      closeModal();
     } catch (err: any) {
       if (err.message !== 'User cancelled image selection') {
         console.error(err);
@@ -40,6 +43,7 @@ const SelectImg = (props: IProps) => {
     try {
       const image = await openCamera(realOptions);
       onChange(image);
+      closeModal();
     } catch (err: any) {
       if (err.message !== 'User cancelled image selection') {
         console.error(err);
@@ -61,6 +65,11 @@ const SelectImg = (props: IProps) => {
         <Pressable style={styles.option} onPress={takeImage}>
           <Icon name="camera-outline" type="ionicon" />
           <Text>Camera</Text>
+        </Pressable>
+        <Text><Icon name="calendar-sharp" type="ionicon" /></Text>
+        <Pressable style={styles.option} onPress={() => setVisible(false)}>
+          <Icon name="camera-outline" type="ionicon" />
+          <Text>Cancel</Text>
         </Pressable>
       </SafeAreaView>
     </Modal>

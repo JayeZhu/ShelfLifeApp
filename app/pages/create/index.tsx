@@ -1,12 +1,12 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View, Image, TextInput } from 'react-native';
-import ImagePicker, { Image as PickedImage } from 'react-native-image-crop-picker';
-import { Circle } from 'react-native-progress';
-import { convertToNumber } from './number';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { Image as PickedImage } from 'react-native-image-crop-picker';
 import { getAccessToken, getAccurateOCR, getGeneralOCR } from './service';
-import { getProductionDayByResult, getShelfDays, getShelfDaysByResult } from './utils';
+import { getProductionDayByResult, getShelfDaysByResult } from './utils';
 import SelectImg from '../../components/SelectImg';
+import { Icon } from '@rneui/themed';
+import dayjs, { ManipulateType } from 'dayjs';
+// import { Icon } from '@rneui/base';
 
 const DEFAULT_HEIGHT = 500;
 const DEFAULT_WITH = 600;
@@ -26,18 +26,21 @@ function Home() {
   const [imgShelf, setImgShelf] = useState(null)
   const [imgProduction, setImgProduction] = useState(null);
   const [token, setToken] = useState('');
-  const [shelfDays, setShelfDays] = useState('');
+  const [shelfDays, setShelfDays] = useState<{ num: Number, unit: ManipulateType}>({ num: 0, unit: 'day'});
   const [productionDay, setProductionDay] = useState('');
+  const [expiration, setExpiration] = useState('');
 
   const getShelfDaysFromImg = async (imgData: string) => {
     setIsLoading(true);
+    console.log('imgData', imgData);
     try {
       const res = await getAccurateOCR(imgData, token);
-      const curshelfDays = getShelfDaysByResult(res);
-      setShelfDays(curshelfDays?.toString());
+      console.log('res', res);
+      const { num, unit } = getShelfDaysByResult(res);
+      setShelfDays({ num, unit });
     } catch (err) {
       console.error(err);
-      setShelfDays('');
+      setShelfDays({ num: 0, unit: 'day' });
     }
     setIsLoading(false);
   };
@@ -45,12 +48,14 @@ function Home() {
   const getProductDayFromImg = async (imgData: string) => {
     setIsLoading(true);
     try {
+      console.log('imgData', imgData);
       const res = await getGeneralOCR(imgData, token);
+      console.log('res', res);
       const curProductionDay = getProductionDayByResult(res);
       setProductionDay(curProductionDay);
     } catch (err) {
       console.error(err);
-      setShelfDays('');
+      setProductionDay('');
     }
     setIsLoading(false);
     setProgress(0);
@@ -60,6 +65,8 @@ function Home() {
     try {
       const res = await getAccessToken();
       if (res) {
+        console.log('initAccessToken', res);
+        console.log('access_token', res.data.access_token);
         setToken(res.data.access_token)
       } else {
         setToken('');
@@ -72,6 +79,8 @@ function Home() {
   }
 
   const onSelectProductionImg = async (image: PickedImage) => {
+    console.log('image', image);
+    console.log('image?.data', image?.data);
     image?.data && getProductDayFromImg(image?.data)
   }
 
@@ -83,8 +92,16 @@ function Home() {
     initAccessToken();
   }, [])
 
+  useEffect(() => {
+    if (productionDay && shelfDays) {
+      const target = dayjs(productionDay).add(Number(shelfDays?.num), shelfDays?.unit).format('YYYY-MM-DD');
+      setExpiration(target);
+    }
+  }, [productionDay, shelfDays])
+
   return (
-    <View style={styles.container}>
+    <View>
+      <Icon name='devices' type="material" />
       <View style={{ display: "flex" }}>
         <Text>生产日期</Text>
         <TextInput value={productionDay} />
@@ -92,41 +109,13 @@ function Home() {
       </View>
       <View style={{ display: "flex" }}>
         <Text>保质期</Text>
-        <TextInput value={shelfDays} />
+        <TextInput value={shelfDays?.num + shelfDays?.unit} />
         <SelectImg onChange={onSelectShelfImg} />
       </View>
-
-      {/* <Text style={styles.instructions}>保质期:</Text>
-      <View style={styles.options}>
-        <View style={styles.button}>
-          <Button
-            disabled={isLoading}
-            title="Camera"
-            onPress={() => {
-              selectImg(defaultPickerOptions, 'openCamera', setImgProduction, getGeneralOCR);
-            }}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button
-            disabled={isLoading}
-            title="Picker"
-            onPress={() => {
-              recognizeFromPicker();
-            }}
-          />
-        </View>
+      <View>
+        <Text>过期时间</Text>
+        <TextInput value={expiration} />
       </View>
-      {imgSrc && (
-        <View style={styles.imageContainer}>
-          <Image style={styles.image} source={imgSrc} />
-          {isLoading ? (
-            <Circle showsText progress={progress} />
-          ) : (
-            <Text>{shelfDays}天</Text>
-          )}
-        </View>
-      )} */}
     </View>
   );
 }

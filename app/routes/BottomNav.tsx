@@ -42,7 +42,7 @@ const BottomNav = () => {
         })}
       >
         <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="Dashboards" component={Dashboards} />
+        {/* <Tab.Screen name="Dashboards" component={Dashboards} /> */}
         <Tab.Screen name="Settings" component={SettingsScreen} />
       </Tab.Navigator>
     </NavigationContainer>

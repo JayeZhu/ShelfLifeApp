@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs, { ManipulateType } from "dayjs";
 
 const chineseToArabic: any = {
   零: 0,
@@ -35,25 +35,30 @@ export const getShelfDaysByResult = (res: any) => {
   const textArr = result?.map(i => i?.words);
   const shelfText = textArr?.find(i => i?.includes('保质')) || ''
   const [pre, suf] = shelfText?.includes('保质期') ? shelfText?.split('保质期') : shelfText?.split('保质');
-  let [numStr, multiple] = ['', 1];
+  let [numStr, unit]: [string, ManipulateType] = ['', 'days'];
   if (suf) {
     if (suf?.includes('年')) {
       [numStr] = suf?.split('年');
-      multiple = 365;
+      unit = 'year';
     } else if (suf?.includes('月')) {
       [numStr] = suf?.includes('个月') ? suf?.split('个月') : suf?.split('月');
-      multiple = 30;
+      unit = 'month';
     } else if (suf?.includes('天')) {
       [numStr] = suf?.includes('天');
+      unit = 'day';
     }
   }
-  const numResult = convertToNumber(numStr);
-  return numResult * multiple;
+  const num = convertToNumber(numStr);
+  return { num, unit };
 }
 
 export const getProductionDayByResult = (res: any) => {
   const result = res?.data?.words_result as any[];
+  console.log('result', result);
   const textArr = result?.map(i => i?.words);
-  const dayStr = textArr?.find(i => i?.startWith('20') && dayjs.isDayjs(i));
+  console.log('textArr', textArr);
+  const dayStr = textArr?.find(i => i?.startsWith('20'));
+  // const dayStr = textArr?.find(i => i?.startsWith('20') && dayjs.isDayjs(i));
+  console.log('dayStr', dayStr);
   return dayStr ? dayjs(dayStr).format('YYYY-MM-DD') : '';
 }

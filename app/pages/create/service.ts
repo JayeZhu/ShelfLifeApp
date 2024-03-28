@@ -39,8 +39,8 @@ export const getGeneralOCR = (imgData: string, token: string) => {
 * @return string 鉴权签名信息（Access Token）
 */
 export const getAccessToken = () => {
-  const AK = '2fjHvO7lAJgsSnV9lNWRUpKH';
-  const SK = 'KzgB11N5c3PyB8P67WjkYM0Hni2qZ5Iq';
+  const AK = '1koPvWBJXo0O3kAsQgLqjb7Y';
+  const SK = '8CmxECpYYDvxOkvEt84r8vWjA9Q9rhUZ';
   let options = {
     'method': 'POST',
     'url': 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + AK + '&client_secret=' + SK,
